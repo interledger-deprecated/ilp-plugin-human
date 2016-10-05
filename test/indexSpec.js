@@ -80,18 +80,102 @@ describe('PluginHuman', function () {
     this.plugin.send(transfer)
   })
 
-  it('should "receive" a transfer', function (done) {
-    const transfer = {
+  it('shouldn\'t send a transfer without amount', function () {
+    return this.plugin.send({
       account: 'x',
+      id: 'abc'
+    })
+      .then(() => {
+        assert(false)
+      })
+      .catch((e) => {
+        assert.equal(e.name, 'InvalidFieldsError')
+      })
+  })
+
+  it('shouldn\'t send a transfer with invalid amount', function () {
+    return this.plugin.send({
+      amount: 'aiaomwdaoida',
+      account: 'x',
+      id: 'abc'
+    })
+      .then(() => {
+        assert(false)
+      })
+      .catch((e) => {
+        assert.equal(e.name, 'InvalidFieldsError')
+      })
+  })
+
+  it('shouldn\'t send a transfer without account', function () {
+    return this.plugin.send({
       amount: '10',
       id: 'abc'
-    }
- 
+    })
+      .then(() => {
+        assert(false)
+      })
+      .catch((e) => {
+        assert.equal(e.name, 'InvalidFieldsError')
+      })
+  })
+
+  it('shouldn\'t send a transfer without id', function () {
+    return this.plugin.send({
+      amount: '10',
+      account: 'x'
+    })
+      .then(() => {
+        assert(false)
+      })
+      .catch((e) => {
+        assert.equal(e.name, 'InvalidFieldsError')
+      })
+  })
+
+  it('shouldn\'t send a transfer with execution or expiry', function () {
+    return this.plugin.send({
+      amount: '10',
+      account: 'x',
+      id: 'abc',
+      executionCondition: 'garbage',
+      expiresAt: 'something'
+    })
+      .then(() => {
+        assert(false)
+      })
+      .catch((e) => {
+        assert.equal(e.name, 'InvalidFieldsError')
+      })
+  })
+
+  it('should "receive" a transfer', function (done) {
     this.plugin.on('incoming_transfer', (t) => {
-      assert.deepEqual(t, transfer)
+      assert.equal(t.amount, '10')
+      assert.equal(t.account, 'test')
       done()
     })
 
-    this.plugin.receive(transfer)
+    this.plugin.receiveAmount('10')
+  })
+
+  it('shouldn\'t receive an invalid amount', function () {
+    return this.plugin.receiveAmount('adawdaw')
+      .then(() => {
+        assert(false)
+      })
+      .catch((e) => {
+        assert.equal(e.name, 'InvalidFieldsError')
+      })
+  })
+
+  it('shouldn\'t receive a non-positive amount', function () {
+    return this.plugin.receiveAmount('-10')
+      .then(() => {
+        assert(false)
+      })
+      .catch((e) => {
+        assert.equal(e.name, 'InvalidFieldsError')
+      })
   })
 })

@@ -1,14 +1,39 @@
 'use strict'
 const EventEmitter = require('events')
+const uuid = require('uuid4')
+
+// for validating transfer fields
+class InvalidFieldsError extends Error {
+  constructor () {
+    super()
+    this.name = 'InvalidFieldsError'
+  }
+}
+
+const checkTransfer = (transfer) => {
+  checkAmount(transfer.amount)
+  if (!transfer.account) {
+    throw new InvalidFieldsError('transfer must have an "account"')
+  } else if (!transfer.id) {
+    throw new InvalidFieldsError('transfer must have an "id"')
+  } else if (transfer.executionCondition || transfer.expiresAt) {
+    throw new InvalidFieldsError('this plugin only supports optimistic mode')
+  }
+}
+
+const checkAmount = (amount) => {
+  if (isNaN(+amount)) {
+    throw new InvalidFieldsError('amount "' + amount + '" is not a valid number')
+  } else if (+amount <= 0) {
+    throw new InvalidFieldsError('amount "' + amount + '" must be greater than 0')
+  }
+}
 
 class PluginHuman extends EventEmitter {
   constructor (opts) {
     super()
 
     this._connected = false
-
-    // TODO: does the plugin need to keep a balance?
-    // this._store = opts._store
 
     this._account = opts.account
     this._prefix = opts.prefix
@@ -18,17 +43,6 @@ class PluginHuman extends EventEmitter {
   connect () {
     this._connected = true
     return Promise.resolve(null)
-    // TODO: does the plugin need to keep a balance?
-    /*
-    return this._store.get('balance')
-      .then((balance) => {
-        if (!balance) return this._store.put('balance', '0')
-        return Promise.resolve(null)
-      })
-      .then(() => {
-        this._connected = true
-      })
-    */
   }
 
   disconnect () {
@@ -54,36 +68,28 @@ class PluginHuman extends EventEmitter {
 
   getBalance () {
     return Promise.resolve('0')
-    // TODO: does the plugin need to keep a balance?
-    /*if (!this._connected) return Promise.reject(Error('plugin not connected'))
-    return this._store.get('balance')*/
   }
 
   send (transfer) {
-    this.emit('outgoing_transfer', transfer)
-    return Promise.resolve(null)
-    // TODO: does the plugin need to keep a balance?
-    /*
-    if (!transfer.amount) {
-      return Promise.reject('transfer missing amount')
-    } else if (typeof (+transfer.amount) !== 'number' || +transfer.amount <= 0) {
-      return Promise.reject('invalid transfer amount')
-    }
-
-    return this.getBalance()
-      .then((balance) => {
-        return this._store.put('balance', (+balance + transfer.amount) + '')
-      })
-      .then(() => {
-        this.emit('outgoing_transfer', transfer)
-      })
-    */
+    return new Promise((resolve) => {
+      checkTransfer(transfer)
+      this.emit('outgoing_transfer', transfer)
+      resolve(null)
+    })
   }
 
   // special method to simulate incoming funds
-  receive (transfer) {
-    this.emit('incoming_transfer', transfer)
-    return Promise.resolve(null)
+  receiveAmount (amount) {
+    return new Promise((resolve) => {
+      checkAmount(amount)
+      this.emit('incoming_transfer', {
+        id: uuid(),
+        amount: amount,
+        // there is only one account on plugin human
+        account: this._account
+      })
+      resolve(null)
+    })
   }
 }
 
