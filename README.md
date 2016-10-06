@@ -12,6 +12,12 @@ If `ilp-plugin-human` is set as the optimistic plugin for `ilp-plugin-virtual`,
 then the `send` and `receiveAmount` methods can be used to manually adjust the
 trustline's balance.
 
+For example, if someone is the 'nerd' on a trustline, and the 'noob' wishes to
+raise their balance using cash, then they can use `ilp-plugin-human` to
+manually adjust the balance.  The noob gives the nerd some cash, and the nerd
+uses some UI wrapped around `ilp-plugin-human` to emit `incoming_transfer` for
+the amount of cash received. This will then update the trustline balance.
+
 To instantiate an instance of `ilp-plugin-human`:
 
 ```js
