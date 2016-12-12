@@ -49,7 +49,14 @@ module.exports = class UI {
     this._app.post('/', (req, res) => {
       const amount = +req.body.amount
 
+      if (isNaN(amount) || amount <= 0) {
+        console.log('received invalid value ' + amount)
+        res.status(422).send('Invalid "amount": ' + amount)
+        return
+      }
+
       console.log('got settlement for ' + amount)
+      this._plugin.receiveAmount(amount)
       res.send(this._getHomepage('<p style="color:green;">Sent settlement of ' + amount + '</p>'))
     })
 

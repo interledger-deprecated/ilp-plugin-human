@@ -1,6 +1,7 @@
 'use strict'
 const EventEmitter = require('events')
 const uuid = require('uuid4')
+const UI = require('./ui')
 
 // for validating transfer fields
 class InvalidFieldsError extends Error {
@@ -32,17 +33,24 @@ const checkAmount = (amount) => {
 class PluginHuman extends EventEmitter {
   constructor (opts) {
     super()
+    const options = opts || {}
 
     this._connected = false
 
-    this._account = opts.account
-    this._prefix = opts.prefix
-    this._info = opts.info
+    this._prefix = options.prefix || 'human.'
+    this._account = options.account || (this._prefix + 'user')
+    this._info = options.info || {}
+
+    this._port = options.port || 3005
+    this._ui = new UI({
+      plugin: this,
+      port: this._port
+    })
   }
 
   connect () {
     this._connected = true
-    return Promise.resolve(null)
+    return this._ui.connect()
   }
 
   disconnect () {
