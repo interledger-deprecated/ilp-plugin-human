@@ -30,6 +30,7 @@ module.exports = class UI {
     <br />
     <form action="/" method="post">
       <label>Amount <input type="number" name="amount" /></label><br>
+      <label>Memo <input type="text" name="memo" /></label><br>
       <input type="submit" />
     </form>
     <br />
@@ -48,6 +49,7 @@ module.exports = class UI {
 
     this._app.post('/', (req, res) => {
       const amount = +req.body.amount
+      const memo = req.body.memo.replace(/[^A-Za-z0-9 ]/g, '')
 
       if (isNaN(amount) || amount <= 0) {
         console.log('received invalid value ' + amount)
@@ -55,9 +57,10 @@ module.exports = class UI {
         return
       }
 
-      console.log('got settlement for ' + amount)
-      this._plugin.receiveAmount(amount)
-      res.send(this._getHomepage('<p style="color:green;">Sent settlement of ' + amount + '</p>'))
+      console.log('got settlement for ' + amount + ' (with memo "' + memo + '")')
+      this._plugin.receiveAmount(amount, memo || '')
+      res.send(this._getHomepage('<p style="color:green;">Sent settlement of ' + amount
+        + ' (with memo "' + memo + '")</p>'))
     })
 
     return new Promise((resolve) => {

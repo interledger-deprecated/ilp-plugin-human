@@ -87,14 +87,15 @@ class PluginHuman extends EventEmitter {
   }
 
   // special method to simulate incoming funds
-  receiveAmount (amount) {
+  receiveAmount (amount, memo) {
     return new Promise((resolve) => {
       checkAmount(amount)
       this.emit('incoming_transfer', {
         id: uuid(),
         amount: amount,
         // there is only one account on plugin human
-        account: this._account
+        account: this._account,
+        data: { memo: (memo || '') }
       })
       resolve(null)
     })
