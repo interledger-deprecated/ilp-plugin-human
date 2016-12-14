@@ -49,7 +49,7 @@ module.exports = class UI {
 
     this._app.post('/', (req, res) => {
       const amount = +req.body.amount
-      const memo = req.body.memo.replace(/[^A-Za-z0-9 ]/g, '')
+      const memo = req.body.memo.replace(/[^A-Za-z0-9 .-_~]/g, '')
 
       if (isNaN(amount) || amount <= 0) {
         console.log('received invalid value ' + amount)
@@ -59,6 +59,13 @@ module.exports = class UI {
 
       console.log('got settlement for ' + amount + ' (with memo "' + memo + '")')
       this._plugin.receiveAmount(amount, memo || '')
+        .then(() => {
+          console.log('success!')
+        })
+        .catch((e) => {
+          console.error(e)
+        })
+
       res.send(this._getHomepage('<p style="color:green;">Sent settlement of ' + amount
         + ' (with memo "' + memo + '")</p>'))
     })

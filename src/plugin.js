@@ -41,8 +41,8 @@ class PluginHuman extends EventEmitter {
     this._account = options.account || (this._prefix + 'user')
     this._info = options.info || {}
 
-    this._port = options.port || 3005
-    this._ui = new UI({
+    this._port = options.port
+    this._ui = options.port && new UI({
       plugin: this,
       port: this._port
     })
@@ -50,7 +50,7 @@ class PluginHuman extends EventEmitter {
 
   connect () {
     this._connected = true
-    return this._ui.connect()
+    return this._ui ? this._ui.connect() : Promise.resolve(null)
   }
 
   disconnect () {
@@ -71,7 +71,7 @@ class PluginHuman extends EventEmitter {
   }
 
   getAccount () {
-    return Promise.resolve(this._prefix + this._account)
+    return Promise.resolve(this._account)
   }
 
   getBalance () {
@@ -93,6 +93,7 @@ class PluginHuman extends EventEmitter {
       this.emit('incoming_transfer', {
         id: uuid(),
         amount: amount,
+        ledger: this._prefix,
         // there is only one account on plugin human
         account: this._account,
         data: { memo: (memo || '') }
