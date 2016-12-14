@@ -8,15 +8,12 @@
 It has a `send` method, which will emit an `outgoing_transfer` event,
 and it has a `receiveAmount` method which emits `incoming_transfer`.
 
-If `ilp-plugin-human` is set as the optimistic plugin for `ilp-plugin-virtual`,
-then the `send` and `receiveAmount` methods can be used to manually adjust the
-trustline's balance.
-
-For example, if someone is the 'nerd' on a trustline, and the 'noob' wishes to
-raise their balance using cash, then they can use `ilp-plugin-human` to
-manually adjust the balance.  The noob gives the nerd some cash, and the nerd
-uses some UI wrapped around `ilp-plugin-human` to emit `incoming_transfer` for
-the amount of cash received. This will then update the trustline balance.
+The plugin can be used in this way to test out any component which listens on
+incoming transfers, and can be used as a settlement mechanism in cases where an
+API doesn't exist. For example, you could manually use an instance of plugin human to emit
+`incoming_transfer` whenever someone gives you cash. To make this easier, plugin human
+provides a web interface for creating incoming transfers. The UI is enabled if
+the `port` variable is set in the config.
 
 To instantiate an instance of `ilp-plugin-human`:
 
@@ -26,6 +23,7 @@ PluginHuman = require('ilp-plugin-human')
 const plugin = new PluginHuman({
   account: 'test',
   prefix: 'human.',
+  port: '3005', // optional, starts web interface if provided
   info: {
     currencyCode: 'USD',
     currencySymbol: '$',
