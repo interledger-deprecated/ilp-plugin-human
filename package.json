@@ -1,6 +1,6 @@
 {
   "name": "ilp-plugin-human",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "ILP optimistic plugin for manual settlement",
   "main": "index.js",
   "scripts": {
