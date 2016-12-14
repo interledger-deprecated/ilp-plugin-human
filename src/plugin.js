@@ -38,7 +38,7 @@ class PluginHuman extends EventEmitter {
     this._connected = false
 
     this._prefix = options.prefix || 'human.'
-    this._account = options.account || (this._prefix + 'user')
+    this._account = this._prefix + (options.account || 'user')
     this._info = options.info || {}
 
     this._port = options.port

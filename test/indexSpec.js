@@ -152,7 +152,7 @@ describe('PluginHuman', function () {
   it('should "receive" a transfer', function (done) {
     this.plugin.on('incoming_transfer', (t) => {
       assert.equal(t.amount, '10')
-      assert.equal(t.account, 'test')
+      assert.equal(t.account, 'test.test')
       done()
     })
 
